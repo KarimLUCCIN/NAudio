@@ -10,6 +10,7 @@ using NAudio.CoreAudioApi.Interfaces;
 using NAudio.Dsp;
 using NAudio.Wave;
 using Windows.Media.Devices;
+using NAudio.Utils;
 using NAudio.Wave.SampleProviders;
 
 namespace NAudio.Win8.Wave.WaveOutputs
@@ -95,7 +96,7 @@ namespace NAudio.Win8.Wave.WaveOutputs
         {
             audioClientProperties = new AudioClientProperties()
             {
-                cbSize = (uint) Marshal.SizeOf(typeof (AudioClientProperties)),
+                cbSize = (uint) MarshalHelpers.SizeOf<AudioClientProperties>(),
                 bIsOffload = Convert.ToInt32(useHardwareOffload),
                 eCategory = category,
                 Options = options
@@ -107,11 +108,13 @@ namespace NAudio.Win8.Wave.WaveOutputs
             var icbh = new ActivateAudioInterfaceCompletionHandler(
                 ac2 =>
                 {
+                    
                     if (this.audioClientProperties != null)
                     {
                         IntPtr p = Marshal.AllocHGlobal(Marshal.SizeOf(this.audioClientProperties.Value));
                         Marshal.StructureToPtr(this.audioClientProperties.Value, p, false);
                         ac2.SetClientProperties(p);
+                        Marshal.FreeHGlobal(p);
                         // TODO: consider whether we can marshal this without the need for AllocHGlobal
                     }
 
@@ -602,7 +605,7 @@ namespace NAudio.Win8.Wave.WaveOutputs
         int IsFormatSupported(
             AudioClientShareMode shareMode,
             [In] WaveFormat pFormat,
-            [Out, MarshalAs(UnmanagedType.LPStruct)] out WaveFormatExtensible closestMatchFormat);
+            out IntPtr closestMatchFormat);
 
         int GetMixFormat(out IntPtr deviceFormatPointer);
 
