@@ -61,7 +61,9 @@ namespace NAudio.CoreAudioApi
             Guid audioSessionGuid)
         {
             this.shareMode = shareMode;
-            int hresult = audioClientInterface.Initialize(shareMode, streamFlags, bufferDuration, periodicity, waveFormat, ref audioSessionGuid);
+
+            var pFormat = waveFormat.AsInterop();
+            int hresult = audioClientInterface.Initialize(shareMode, streamFlags, bufferDuration, periodicity, ref pFormat, ref audioSessionGuid);
             Marshal.ThrowExceptionForHR(hresult);
             // may have changed the mix format so reset it
             mixFormat = null;
@@ -250,13 +252,14 @@ namespace NAudio.CoreAudioApi
         {
             IntPtr pointerToPtr = GetPointerToPointer(); // IntPtr.Zero; // Marshal.AllocHGlobal(Marshal.SizeOf<WaveFormatExtensible>());
             closestMatchFormat = null;
-            int hresult = audioClientInterface.IsFormatSupported(shareMode, desiredFormat, pointerToPtr);
+            var pDesiredFormat = desiredFormat.AsInterop();
+            int hresult = audioClientInterface.IsFormatSupported(shareMode, ref pDesiredFormat, pointerToPtr);
 
             var closestMatchPtr = MarshalHelpers.PtrToStructure<IntPtr>(pointerToPtr);
 
             if (closestMatchPtr != IntPtr.Zero)
             {
-                closestMatchFormat = MarshalHelpers.PtrToStructure<WaveFormatExtensible>(closestMatchPtr);
+                closestMatchFormat = MarshalHelpers.PtrToStructure<WaveFormatExtensibleInterop>(closestMatchPtr);
                 Marshal.FreeCoTaskMem(closestMatchPtr);
             }
             Marshal.FreeHGlobal(pointerToPtr);

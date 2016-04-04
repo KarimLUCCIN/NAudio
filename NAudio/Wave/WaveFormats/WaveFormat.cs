@@ -385,6 +385,21 @@ namespace NAudio.Wave
             }
         }
 
-        
+        public virtual WaveFormatExtensibleInterop AsInterop()
+        {
+            return new WaveFormatExtensibleInterop()
+            {
+                averageBytesPerSecond = averageBytesPerSecond,
+                bitsPerSample = bitsPerSample,
+                blockAlign = blockAlign,
+                channels = channels,
+                dwChannelMask = 0,
+                extraSize = 0,
+                sampleRate = sampleRate,
+                subFormat = Guid.Empty,
+                waveFormatTag = waveFormatTag,
+                wValidBitsPerSample = 0
+            };
+        }
     }
 }
